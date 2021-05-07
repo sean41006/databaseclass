@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>登入頁面</title>
+    <link rel="stylesheet" type="text/css" href="/login.css">
+    <script type="text/javascript" href="/login.js"></script>
+  </head>
+  <body>
+    <div id="login_frame">
+      <p id="image_logo" align="center"><img src="https://png.pngtree.com/png-clipart/20191121/original/pngtree-user-login-or-authenticate-icon-on-gray-background-flat-icon-ve-png-image_5089976.jpg"width="500" height="450"></a></p>
+      <form method="post" href="/login.js"> 
+        <table border="0" cellpadding="0" cellspacing="0" align="center">
+          <tbody>
+            <tr>
+             <td></td>
+              <td><p align="right"><label class="label_input">使用者</label></p>
+              </td>
+              <td><p align="left"><input type="text" id="username" class="text_field"/></p>
+             </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><p align="right"><label class="label_input">密碼&#9;</label></p></td>
+              <td><p align="left"><input type="text" id="password" class="text_field"></p></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>
+              <div id="login_control" align="left">
+                <div><input type="button" value="登入" type="button" id="btn_login" onclick="self.location.href='loggg.html'"/></div>
+                <a id="forget_pwd" href="forget_pwd.html">忘記密碼？</a>
+              </td>
+            </tr>
+        </table>
+      </form>
+    </div>
+  </body>
+</html>
