@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>登入頁面</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  </head>
+  <body>
+    <div id="app">
+    <div>
+      <p id="image_logo" align="center"><img src="https://png.pngtree.com/png-clipart/20191121/original/pngtree-user-login-or-authenticate-icon-on-gray-background-flat-icon-ve-png-image_5089976.jpg"width="500" height="450"></a></p>
+        <table border="0" cellpadding="0" cellspacing="0" align="center">
+          <tbody>
+            <tr>
+             <td></td>
+             <div><center><font size="9">百貨公司員工登入頁面</font></center></div>
+              <div><td><p align="right"><label class="label_input">使用者</label></p>
+              </td>
+              <td><p align="left"><input type="text" v-model="User" placeholder="" @keyup.enter="addTodo"></p>
+             </td>
+            </tr>
+            <tr>
+              <td></td>
+              <td><p align="right"><label class="label_input">密碼&#9;</label></p></td>
+              <td><p align="left"><input type="password" v-model="Password" placeholder="" @keyup.enter="addTodo"></p></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>
+              <div id="login_control" align="left">
+                <button @click="addTodo">登入</button>
+              </div>
+              </td>
+            </tr>
+        </table>
+      </form>
+    </div>
+    </div>
+  </body>
+</html>
+
+<script>
+  var app = new Vue({
+    el: '#app',
+    data: {//model
+      User: '',
+      Password: '',
+      catchid: '',
+      todos: [],
+      visibility: 'all',
+      cacheTodo:{},
+      cacheTitle:{},
+      notFinished: 0,
+      url:'http://localhost:8080/',
+    },
+    methods: {//controller
+      addTodo: function() {
+        var user = this.User
+        var password = this.Password
+        console.log(user)
+        console.log(password)
+        if (user != "ABC" || password  != "123"){
+        alert("請輸入正確使用者名稱及密碼");
+      }
+      
+      else{
+        window.location.href="loggg.html";
+      }
+      },  
+    },    
+
+  })
+  </script>
+  
+  <style>
+  .nav-link{
+    background: #fc0909;
+  }
+  .nav-link.active{
+    background: gray;
+  }
+  .todosTitle.check {
+    text-decoration: line-through;
+  }
+  </style>
