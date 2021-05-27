@@ -1,0 +1,227 @@
+<!--
+1.todos
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>parkrecord</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+  <div id="app"><!--view-->
+    <p><font size="9">停車紀錄</font><br><br></p>
+    <div>
+      代辦事項：
+      <input type="text" v-model="newCarnum" placeholder="在此輸入車牌" @keyup.enter="addTodo">
+      <input type="text" v-model="newParktime" placeholder="在此輸入停車時間" @keyup.enter="addTodo">
+      <input type="text" v-model="newParkcardid" placeholder="在此輸入停車卡id" @keyup.enter="addTodo">
+      <button @click="addTodo">新增</button>
+      <Input Type="Button" Value="重新整理" onClick="window.location.reload();">
+    </div>
+    <div>
+      <ul>
+        <li v-for="(item, index, key) in filteredTodos" @dblclick="">
+          <div v-if="item.p_id !== cacheTodo.p_id">
+            
+            <label class="todosTitle" :class="{'check': item.completed}" :for="item.b_id">
+              {{ item.p_id }} - {{ item.carnumber }} - {{item.parktime}} - {{item.parkcard_id}}&nbsp;&nbsp;
+            </label>
+            <button type="button" aria-label="Edit" @click="catcheditid(item)">
+              <span aria-hidden="false">edit</span>
+            <button type="button" aria-label="Close" @click="removeTodo(item)">
+              <span aria-hidden="false">×</span>
+            </button>
+          </div>
+          <div v-if="item.p_id === cacheTodo.p_id">
+          	<input v-model="cacheTitle" type="text" @keyup.enter="doneEdit(item)" @keyup.esc="cancelEdit()">
+          </div>
+        </li>
+      </ul>
+        <input type="text" v-model="editCarnum" placeholder="在此輸入修改的車牌" @keyup.enter="editTodo">
+        <input type="text" v-model="editParktime" placeholder="在此輸入修改的停車時間" @keyup.enter="editTodo">
+        <input type="text" v-model="editParkcard_id" placeholder="在此輸入修改的停車場id" @keyup.enter="editTodo">
+      <button @click="editTodo">修改送出</button>
+      <Input Type="Button" Value="重新整理" onClick="window.location.reload();">
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+var app = new Vue({
+	el: '#app',
+  data: {//model
+    newCarnum: '',
+    newParktime: '',
+    newParkcardid: '',
+    editCarnum: '',
+    editParktime: '',
+    editParkcard_id: '',
+    catchid: '',
+    todos: [],
+    visibility: 'all',
+    cacheTodo:{},
+    cacheTitle:{},
+    notFinished: 0,
+    url:'http://localhost:8080/',
+  },
+  methods: {//controller
+    addTodo: function() {
+        var inserturl = this.url +'insertParkrecord';
+        
+        var carnum = this.newCarnum.trim();
+        var parktime = this.newParktime.trim();
+        var parkcard_id = parseInt(this.newParkcardid.trim());
+        var data = {
+          p_id:'',
+          carnumber:carnum,
+          parktime:parktime,
+          parkcard_id:parkcard_id,
+        };
+        console.log(data)
+        fetch(inserturl, {
+          method: 'POST', // or 'PUT'
+          body: JSON.stringify(data), // data can be `string` or {object}!
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));
+        
+    },
+    removeTodo: function(todo) {
+    	var vm = this
+      var deleteurl = this.url+'deleteParkrecord';
+
+      var newIndex = vm.todos.findIndex( function(item) {
+        return todo.p_id == item.p_id
+    	})
+      console.log(todo.id)
+      fetch(deleteurl, {
+          method: 'DELETE', // or 'PUT'
+          body: JSON.stringify(todo.b_id), // data can be `string` or {object}!
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));      
+    	this.todos.splice(newIndex, 1)
+      this.countTodo()
+    },
+    catcheditid:function(todo){
+      var vm = this
+      var newIndex = vm.todos.findIndex( function(item) {
+        return todo.id == item.p_id
+    	})
+      catchid = todo.p_id
+      console.log(catchid)
+    },
+    editTodo: function(item) {
+      var updateurl = this.url+'updateParkrecord';
+      // var catid = this.catchid.trim();
+      var editcarnum = this.editCarnum.trim();
+      var editparktime = this.editParktime.trim();
+      var editparkcard_id = parseInt(this.editParkcard_id.trim());
+      var editdata = {
+          p_id:catchid,
+          carnumber:editcarnum,
+          parktime:editparktime,
+          parkcard_id:editparkcard_id
+      };
+      console.log(editdata)
+      console.log(catchid)
+      fetch(updateurl, {
+          method: 'PUT', // or 'PUT'
+          body: JSON.stringify(editdata), // data can be `string` or {object}!
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));        
+    },
+    cancelEdit: function() {
+      this.cacheTodo = {}
+      this.cacheTitle = ''
+    },
+    doneEdit: function(item) {
+    	item.title = this.cacheTitle
+    	this.cancelEdit()
+    },
+    countTodo: function() {
+    	var counter = 0
+      this.todos.forEach(function(item) {
+      	if(!item.completed){
+        	counter++
+        }
+      })
+      this.notFinished = counter
+    },
+    clearn: function() {
+    	var vm = this
+      this.todos.slice().reverse().forEach(function(item) {
+      	if(item.completed){
+          vm.removeTodo(item)
+        }
+      })
+    }
+  },    
+    beforeMount: function(){
+      var geturl = this.url +'getParkrecord';
+        
+      //var name = this.newTodo.trim();
+      var data
+        
+        
+      fetch(geturl, {
+        method: 'GET', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+      }).then(res => res.json())
+      .catch(error => console.error('Error:', error))
+      .then(res => this.todos=res.arrparkrecord);
+      console.log(this.todos)
+      
+  },
+  computed: {
+    filteredTodos: function() {
+      if(this.visibility == 'all')
+        return this.todos
+      else if(this.visibility == 'active'){
+        var newTodo = []
+        this.todos.forEach(function (item){
+          if (!item.completed) {
+            newTodo.push(item)
+          }
+        })
+        return newTodo
+      }
+      else{
+        var newTodo = []
+        this.todos.forEach(function (item){
+          if (item.completed) {
+            newTodo.push(item)
+          }
+        })
+        return newTodo
+      }
+    }
+  }
+})
+</script>
+
+<style>
+.nav-link{
+  background: #4fc08d;
+}
+.nav-link.active{
+  background: gray;
+}
+.todosTitle.check {
+  text-decoration: line-through;
+}
+</style>

@@ -1,0 +1,235 @@
+<!--
+1.todos
+-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>member</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+  <div id="app"><!--view-->
+    <p><font size="9">會員</font><br><br></p>
+    <div>
+      代辦事項：
+      <input type="text" v-model="newLevel" placeholder="在此輸入會員等級" @keyup.enter="addTodo">
+      <input type="text" v-model="newName" placeholder="在此輸入會員名稱" @keyup.enter="addTodo">
+      <input type="text" v-model="newPhone" placeholder="在此輸入會員電話" @keyup.enter="addTodo">
+      <input type="text" v-model="newAddress" placeholder="在此輸入會員地址" @keyup.enter="addTodo">
+      <button @click="addTodo">新增</button>
+      <Input Type="Button" Value="重新整理" onClick="window.location.reload();">
+    </div>
+    <div>
+      <ul>
+        <li v-for="(item, index, key) in filteredTodos" @dblclick="">
+          <div v-if="item.m_id !== cacheTodo.m_id">
+            
+            <label class="todosTitle" :class="{'check': item.completed}" :for="item.e_id">
+              {{ item.m_id }} - {{ item.level }} - {{item.name}} - {{item.phone}} - {{item.address}} &nbsp;&nbsp;
+            </label>
+            <button type="button" aria-label="Edit" @click="catcheditid(item)">
+              <span aria-hidden="false">edit</span>
+            <button type="button" aria-label="Close" @click="removeTodo(item)">
+              <span aria-hidden="false">×</span>
+            </button>
+          </div>
+          <div v-if="item.m_id === cacheTodo.m_id">
+          	<input v-model="cacheTitle" type="text" @keyup.enter="doneEdit(item)" @keyup.esc="cancelEdit()">
+          </div>
+        </li>
+      </ul>
+        <input type="text" v-model="editLevel" placeholder="在此輸入修改的會員等級" @keyup.enter="editTodo">
+        <input type="text" v-model="editName" placeholder="在此輸入修改的會員名稱" @keyup.enter="editTodo">
+        <input type="text" v-model="editPhone" placeholder="在此輸入修改的會員電話" @keyup.enter="editTodo">
+        <input type="text" v-model="editAddress" placeholder="在此輸入修改的會員地址" @keyup.enter="editTodo">
+      <button @click="editTodo">修改送出</button>
+      <Input Type="Button" Value="重新整理" onClick="window.location.reload();">
+    </div>
+  </div>
+</body>
+</html>
+
+<script>
+var app = new Vue({
+	el: '#app',
+  data: {//model
+    newLevel: '',
+    newName: '',
+    newPhone:'',
+    newAddress:'',
+    editLevel: '',
+    editName: '',
+    editPhone: '',
+    editAddress: '',
+    catchid: '',
+    todos: [],
+    visibility: 'all',
+    cacheTodo:{},
+    cacheTitle:{},
+    notFinished: 0,
+    url:'http://localhost:8080/',
+  },
+  methods: {//controller
+    addTodo: function() {
+        var inserturl = this.url +'insertMember';
+        
+        var level = this.newLevel.trim();
+        var name = this.newName.trim();
+        var phone = this.newPhone.trim();
+        var address = this.newAddress.trim();
+        var data = {
+          m_id:'',
+          level:level,
+          name:name,
+          phone:phone,
+          address:address,
+        };
+        console.log(data)
+        fetch(inserturl, {
+          method: 'POST', // or 'PUT'
+          body: JSON.stringify(data), // data can be `string` or {object}!
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));
+        
+    },
+    removeTodo: function(todo) {
+    	var vm = this
+      var deleteurl = this.url+'deleteMember';
+
+      var newIndex = vm.todos.findIndex( function(item) {
+        return todo.m_id == item.m_id
+    	})
+      console.log(todo.id)
+      fetch(deleteurl, {
+          method: 'DELETE', // or 'PUT'
+          body: JSON.stringify(todo.m_id), // data can be `string` or {object}!
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));      
+    	this.todos.splice(newIndex, 1)
+      this.countTodo()
+    },
+    catcheditid:function(todo){
+      var vm = this
+      var newIndex = vm.todos.findIndex( function(item) {
+        return todo.id == item.m_id
+    	})
+      catchid = todo.m_id
+      console.log(catchid)
+    },
+    editTodo: function(item) {
+      var updateurl = this.url+'updateMember';
+      // var catid = this.catchid.trim();
+        var editlevel = this.editLevel.trim();
+        var editname = this.editName.trim();
+        var editphone = this.editPhone.trim();
+        var editaddress = this.editAddress.trim();
+      var editdata = {
+          m_id:catchid,
+          level:editlevel,
+          name:editname,
+          phone:editphone,
+          address:editaddress,
+      };
+      console.log(editdata)
+      console.log(catchid)
+      fetch(updateurl, {
+          method: 'PUT', // or 'PUT'
+          body: JSON.stringify(editdata), // data can be `string` or {object}!
+          headers: new Headers({
+            'Content-Type': 'application/json'
+          }),
+        }).then(res => res.json())
+        .catch(error => console.error('Error:', error))
+        .then(response => console.log('Success:', response));        
+    },
+    cancelEdit: function() {
+      this.cacheTodo = {}
+      this.cacheTitle = ''
+    },
+    doneEdit: function(item) {
+    	item.title = this.cacheTitle
+    	this.cancelEdit()
+    },
+    countTodo: function() {
+    	var counter = 0
+      this.todos.forEach(function(item) {
+      	if(!item.completed){
+        	counter++
+        }
+      })
+      this.notFinished = counter
+    },
+    clearn: function() {
+    	var vm = this
+      this.todos.slice().reverse().forEach(function(item) {
+      	if(item.completed){
+          vm.removeTodo(item)
+        }
+      })
+    }
+  },    
+    beforeMount: function(){
+      var geturl = this.url +'getMember';
+        
+      //var name = this.newTodo.trim();
+      var data
+        
+        
+      fetch(geturl, {
+        method: 'GET', // or 'PUT'
+        body: JSON.stringify(data), // data can be `string` or {object}!
+        headers: new Headers({
+          'Content-Type': 'application/json'
+        }),
+      }).then(res => res.json())
+      .catch(error => console.error('Error:', error))
+      .then(res => this.todos=res.arrmemberall);
+      console.log(this.todos)
+      
+  },
+  computed: {
+    filteredTodos: function() {
+      if(this.visibility == 'all')
+        return this.todos
+      else if(this.visibility == 'active'){
+        var newTodo = []
+        this.todos.forEach(function (item){
+          if (!item.completed) {
+            newTodo.push(item)
+          }
+        })
+        return newTodo
+      }
+      else{
+        var newTodo = []
+        this.todos.forEach(function (item){
+          if (item.completed) {
+            newTodo.push(item)
+          }
+        })
+        return newTodo
+      }
+    }
+  }
+})
+</script>
+
+<style>
+.nav-link{
+  background: #4fc08d;
+}
+.nav-link.active{
+  background: gray;
+}
+.todosTitle.check {
+  text-decoration: line-through;
+}
+</style>
